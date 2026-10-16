@@ -6,60 +6,117 @@
 
 @if (Auth.IsLoggedIn)
 {
-    <section class="relative mb-8 overflow-hidden rounded-[30px] border border-orange-300/30 bg-gradient-to-br from-stone-950 via-stone-900 to-orange-950 shadow-[0_25px_80px_rgba(251,146,60,0.2)]">
-        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(251,146,60,0.38),_transparent_30%),radial-gradient(circle_at_bottom_right,_rgba(251,191,36,0.25),_transparent_28%)]"></div>
+    var all = Recipes.GetAll().ToList();
+    var spot = all.FirstOrDefault();
+    var reviewCount = all.Sum(r => r.Reviews.Count);
 
-        <div class="relative grid gap-6 px-6 py-6 sm:px-8 sm:py-8 lg:grid-cols-[1.4fr_0.6fr] lg:items-end">
-            <div class="space-y-5">
-                <span class="inline-flex items-center rounded-full border border-orange-300/40 bg-orange-500/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-orange-100">
+    <section class="relative mb-10 overflow-hidden rounded-[36px] border border-orange-300/20 bg-stone-950 shadow-[0_30px_90px_rgba(251,146,60,0.22)]">
+        @* Atmosphere: warm glows + dotted texture *@
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_15%_10%,rgba(251,146,60,0.40),transparent_35%),radial-gradient(circle_at_90%_85%,rgba(244,63,94,0.28),transparent_35%)]"></div>
+        <div class="absolute inset-0 opacity-70 [background-image:radial-gradient(rgba(255,255,255,0.08)_1px,transparent_1px)] [background-size:22px_22px]"></div>
+
+        <div class="relative grid items-center gap-10 px-6 pt-10 pb-12 sm:px-10 lg:grid-cols-[1.15fr_0.85fr] lg:pt-14">
+
+            @* ---------- LEFT: headline + actions ---------- *@
+            <div class="space-y-7">
+                <span class="inline-flex items-center gap-2 rounded-full border border-orange-300/30 bg-orange-500/10 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-orange-100">
+                    <span class="relative flex h-2 w-2">
+                        <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-75 motion-reduce:animate-none"></span>
+                        <span class="relative inline-flex h-2 w-2 rounded-full bg-orange-400"></span>
+                    </span>
                     Fresh picks today
                 </span>
 
-                <div>
-                    <h1 class="font-display text-4xl font-black tracking-[-0.06em] text-white sm:text-5xl lg:text-7xl">
-                        Cook.<br />
-                        Share.<br />
-                        Savor.
-                    </h1>
-                    <p class="mt-4 max-w-xl text-sm text-stone-300 sm:text-base">
-                        Welcome back, @Auth.CurrentUser!.Username! Discover vibrant dishes, save your favorites, and inspire your next culinary moment.
-                    </p>
-                </div>
+                <h1 class="font-display font-black leading-[0.88] tracking-[-0.05em] text-6xl sm:text-7xl lg:text-[7rem]">
+                    <span class="block text-white">Cook.</span>
+                    <span class="block text-transparent [-webkit-text-stroke:2px_rgb(253_186_116)]">Share.</span>
+                    <span class="block bg-gradient-to-r from-amber-200 via-orange-400 to-rose-500 bg-clip-text italic text-transparent">Savor.</span>
+                </h1>
+
+                <p class="max-w-md text-base text-stone-300">
+                    Welcome back, <span class="font-semibold text-orange-200">@Auth.CurrentUser!.Username</span>.
+                    Find your next obsession, save the keepers, and show the world what's on your stove.
+                </p>
 
                 <div class="flex flex-wrap items-center gap-3">
-                    <button class="btn-primary shadow-lg shadow-orange-500/30 transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-orange-500/40" @onclick="() => showForm = !showForm">
+                    <button class="btn-primary px-7 py-3 text-base shadow-lg shadow-orange-500/30 transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-orange-500/40"
+                            @onclick="() => showForm = !showForm">
                         + Share a recipe
                     </button>
-                    <span class="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-stone-200">
-                        24 new ideas this week
-                    </span>
+                    <a href="/dashboard#cuisines"
+                       class="rounded-full border border-white/20 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10">
+                        Explore cuisines ↓
+                    </a>
                 </div>
+
+                @* Live stats from real data *@
+                <dl class="flex gap-8 border-t border-white/10 pt-6">
+                    <div>
+                        <dt class="text-[10px] uppercase tracking-[0.2em] text-stone-400">Recipes</dt>
+                        <dd class="font-display text-3xl font-bold text-white">@all.Count</dd>
+                    </div>
+                    <div>
+                        <dt class="text-[10px] uppercase tracking-[0.2em] text-stone-400">Cuisines</dt>
+                        <dd class="font-display text-3xl font-bold text-white">@Recipes.Cuisines.Count</dd>
+                    </div>
+                    <div>
+                        <dt class="text-[10px] uppercase tracking-[0.2em] text-stone-400">Reviews</dt>
+                        <dd class="font-display text-3xl font-bold text-white">@reviewCount</dd>
+                    </div>
+                </dl>
             </div>
 
-            <div class="relative flex items-end justify-center lg:justify-end">
-                <div class="relative w-full max-w-xs rounded-[24px] border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
-                    <div class="absolute -left-6 top-8 h-20 w-20 rounded-full bg-orange-400/30 blur-2xl"></div>
-                    <div class="relative space-y-4">
-                        <div class="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-orange-100/80">
-                            <span>Trending</span>
-                            <span>🔥</span>
-                        </div>
-                        <div class="space-y-2">
-                            <div class="text-3xl font-black text-white">18k</div>
-                            <div class="text-sm text-stone-300">recipes shared this month</div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-3 pt-2">
-                            <div class="rounded-2xl bg-stone-900/70 p-3">
-                                <div class="text-[10px] uppercase tracking-[0.18em] text-stone-400">Top vibe</div>
-                                <div class="mt-2 text-lg font-bold text-orange-200">Cozy</div>
-                            </div>
-                            <div class="rounded-2xl bg-stone-900/70 p-3">
-                                <div class="text-[10px] uppercase tracking-[0.18em] text-stone-400">Quick</div>
-                                <div class="mt-2 text-lg font-bold text-yellow-200">15 min</div>
-                            </div>
+            @* ---------- RIGHT: the plate ---------- *@
+            @if (spot is not null)
+            {
+                <div class="relative mx-auto h-72 w-72 sm:h-96 sm:w-96">
+                    <div class="absolute inset-0 rounded-full bg-orange-500/30 blur-3xl"></div>
+
+                    @* dashed orbit ring *@
+                    <div class="absolute -inset-4 animate-[spin_40s_linear_infinite] rounded-full border border-dashed border-orange-300/30 motion-reduce:animate-none"></div>
+
+                    @* plate rim + dish *@
+                    <div class="absolute inset-0 rounded-full bg-gradient-to-br from-amber-200 via-orange-400 to-rose-500 p-3 shadow-2xl shadow-orange-600/40">
+                        <div class="flex h-full w-full items-center justify-center rounded-full bg-stone-950 text-[8rem] sm:text-[10rem]">
+                            <span class="animate-float drop-shadow-[0_12px_20px_rgba(0,0,0,0.6)] motion-reduce:animate-none">@spot.Emoji</span>
                         </div>
                     </div>
+
+                    @* floating sticker: spotlight recipe *@
+                    <div class="absolute -left-4 top-6 animate-float rounded-2xl border border-white/10 bg-stone-900/90 px-4 py-3 shadow-xl backdrop-blur motion-reduce:animate-none sm:-left-10">
+                        <div class="text-[10px] uppercase tracking-[0.2em] text-orange-200/80">Spotlight</div>
+                        <div class="font-display text-sm font-bold text-white">@spot.Title</div>
+                        <div class="text-xs text-stone-400">
+                            @(spot.Reviews.Count == 0 ? "Be the first to review" : $"⭐ {spot.AverageRating:0.0} · {spot.Reviews.Count} reviews")
+                        </div>
+                    </div>
+
+                    @* floating sticker: cook time *@
+                    <div class="absolute -right-2 bottom-16 animate-float-slow rounded-full bg-white px-4 py-2 text-sm font-bold text-stone-900 shadow-xl motion-reduce:animate-none sm:-right-8">
+                        ⏱ @spot.CookTimeMinutes min
+                    </div>
+
+                    @* rotating text badge *@
+                    <div class="absolute -bottom-6 -left-2 flex h-28 w-28 items-center justify-center sm:left-2">
+                        <div class="absolute inset-0 animate-spin-slow motion-reduce:animate-none">@((MarkupString)BadgeSvg)</div>
+                        <span class="text-2xl">🍴</span>
+                    </div>
                 </div>
+            }
+        </div>
+
+        @* ---------- Cuisine ticker ---------- *@
+        <div class="relative overflow-hidden border-t border-white/10 bg-black/30 py-3">
+            <div class="flex w-max animate-marquee gap-10 motion-reduce:animate-none">
+                @for (var i = 0; i < 2; i++)
+                {
+                    @foreach (var c in Recipes.Cuisines)
+                    {
+                        <span class="whitespace-nowrap text-xs font-semibold uppercase tracking-[0.3em] text-orange-100/70">
+                            @c.Emoji @c.Name <span class="ml-10 text-orange-400">✦</span>
+                        </span>
+                    }
+                }
             </div>
         </div>
     </section>
@@ -88,7 +145,7 @@
         </section>
     }
 
-    <section class="flex flex-wrap gap-2 mb-8">
+    <section id="cuisines" class="flex flex-wrap gap-2 mb-8 scroll-mt-24">
         <span class="chip @(cuisine is null ? "chip-active" : "")" @onclick="() => cuisine = null">All</span>
         @foreach (var c in Recipes.Cuisines)
         {
@@ -109,6 +166,14 @@
     private bool showForm;
     private Recipe draft = new() { Cuisine = "Italian", CookTimeMinutes = 30 };
     private string ingredients = "", steps = "";
+
+    // Circular text badge. Built as a string so Razor doesn't treat <text> as a code-block tag.
+    private const string BadgeSvg =
+        "<svg viewBox='0 0 120 120' class='h-full w-full'>" +
+        "<circle cx='60' cy='60' r='58' fill='#1c1917' stroke='rgba(253,186,116,0.4)'/>" +
+        "<defs><path id='badgeCircle' d='M60,60 m-44,0 a44,44 0 1,1 88,0 a44,44 0 1,1 -88,0'/></defs>" +
+        "<text fill='#fed7aa' font-size='10' font-weight='700' letter-spacing='3'>" +
+        "<textPath href='#badgeCircle'>FRESH • HOMEMADE • SHARED • </textPath></text></svg>";
 
     protected override void OnInitialized()
     {
