@@ -1,0 +1,54 @@
+﻿@page "/"
+@page "/login"
+@inject AuthState Auth
+@inject NavigationManager Nav
+
+<div class="max-w-md mx-auto mt-10 card p-8 hover:translate-y-0">
+    <div class="text-center mb-6">
+        <div class="text-5xl">🍳</div>
+        <h1 class="font-display text-3xl font-bold text-tomato">FoodieHub</h1>
+        <p class="text-stone-500 text-sm">Share recipes. Discover cuisines.</p>
+    </div>
+    <div class="space-y-4">
+        <input class="input" type="email" placeholder="Email" @bind="email" />
+        <input class="input" type="password" placeholder="Password" @bind="password" @onkeydown="OnKey" />
+        @if (error is not null)
+        {
+            <p class="text-sm text-red-600">@error</p>
+        }
+        <button class="btn-primary w-full" @onclick="DoLogin">Log in</button>
+
+        <div class="pt-2 text-center">
+            <p class="text-sm text-stone-500">
+                Don’t have an account?
+                <button type="button" class="font-semibold text-tomato hover:underline" @onclick="GoToRegister">
+                    Register here
+                </button>
+            </p>
+        </div>
+
+        <p class="text-xs text-center text-stone-400">Demo: demo@foodiehub.com / password123</p>
+    </div>
+</div>
+
+@code {
+    private string email = "demo@foodiehub.com";
+    private string password = "";
+    private string? error;
+
+    private void OnKey(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") DoLogin();
+    }
+
+    private void DoLogin()
+    {
+        if (Auth.Login(email, password)) Nav.NavigateTo("/dashboard");
+        else error = "Invalid email or password.";
+    }
+
+    private void GoToRegister()
+    {
+        Nav.NavigateTo("/register");
+    }
+}

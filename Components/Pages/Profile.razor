@@ -1,0 +1,82 @@
+@page "/profile"
+@implements IDisposable
+@inject AuthState Auth
+@inject RecipeService Recipes
+@inject NavigationManager Nav
+
+@if (Auth.IsLoggedIn)
+{
+    var user = Auth.CurrentUser!;
+
+    <section class="card p-6 mb-8 hover:translate-y-0 flex items-center gap-5">
+        <div class="text-6xl">@user.Avatar</div>
+        <div>
+            <h1 class="font-display text-3xl font-bold">@user.Username</h1>
+            <p class="text-stone-500">@user.Bio</p>
+            <p class="text-xs text-stone-400 mt-1">
+                @Recipes.GetByAuthor(user.Id).Count() posts · @Recipes.GetReviewsBy(user.Id).Count() reviews · @user.FavoriteRecipeIds.Count favorites
+            </p>
+        </div>
+    </section>
+
+    <div class="flex gap-2 mb-6">
+        @foreach (var t in new[] { "Posts", "Reviews", "Favorites" })
+        {
+            <span class="chip @(tab == t ? "chip-active" : "")" @onclick="() => tab = t">@t</span>
+        }
+    </div>
+
+    @if (tab == "Posts")
+    {
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            @foreach (var r in Recipes.GetByAuthor(user.Id))
+            {
+                <RecipeCard Recipe="r" @key="r.Id" />
+            }
+        </div>
+    }
+    else if (tab == "Favorites")
+    {
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            @foreach (var r in Recipes.GetFavorites(user))
+            {
+                <RecipeCard Recipe="r" @key="r.Id" />
+            }
+        </div>
+        @if (!user.FavoriteRecipeIds.Any())
+        {
+            <p class="text-stone-500">No favorites yet. Tap 🤍 on a recipe!</p>
+        }
+    }
+    else
+    {
+        <div class="space-y-3">
+            @foreach (var rv in Recipes.GetReviewsBy(user.Id))
+            {
+                <div class="card p-4 hover:translate-y-0">
+                    <p class="font-semibold">@Recipes.Find(rv.RecipeId)?.Title <span class="ml-2">@(new string('⭐', rv.Rating))</span></p>
+                    <p class="text-sm text-stone-600">@rv.Comment</p>
+                </div>
+            }
+        </div>
+    }
+}
+
+@code {
+    private string tab = "Posts";
+
+    protected override void OnInitialized()
+    {
+        if (!Auth.IsLoggedIn)
+        {
+            Nav.NavigateTo("/");
+            return;
+        }
+
+        Recipes.Changed += Refresh;
+    }
+
+    private void Refresh() => InvokeAsync(StateHasChanged);
+
+    public void Dispose() => Recipes.Changed -= Refresh;
+}

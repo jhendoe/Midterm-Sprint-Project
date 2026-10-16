@@ -1,0 +1,53 @@
+@page "/register"
+@inject AuthState Auth
+@inject NavigationManager Nav
+
+<div class="max-w-md mx-auto mt-10 card p-8 hover:translate-y-0">
+    <div class="text-center mb-6">
+        <div class="text-5xl">✨</div>
+        <h1 class="font-display text-3xl font-bold text-tomato">Create account</h1>
+        <p class="text-stone-500 text-sm">Join FoodieHub and start sharing recipes.</p>
+    </div>
+
+    <div class="space-y-4">
+        <input class="input" type="text" placeholder="Username" @bind="username" />
+        <input class="input" type="email" placeholder="Email" @bind="email" />
+        <input class="input" type="password" placeholder="Password" @bind="password" />
+        <input class="input" type="text" placeholder="Short bio (optional)" @bind="bio" />
+
+        @if (error is not null)
+        {
+            <p class="text-sm text-red-600">@error</p>
+        }
+
+        <button class="btn-primary w-full" @onclick="DoRegister">Register</button>
+
+        <p class="text-sm text-center text-stone-500">
+            Already have an account?
+            <button type="button" class="font-semibold text-tomato hover:underline" @onclick="GoToLogin">
+                Log in
+            </button>
+        </p>
+    </div>
+</div>
+
+@code {
+    private string username = "";
+    private string email = "";
+    private string password = "";
+    private string bio = "";
+    private string? error;
+
+    private void DoRegister()
+    {
+        if (Auth.Register(username, email, password, bio))
+        {
+            Nav.NavigateTo("/dashboard");
+            return;
+        }
+
+        error = "Please enter a valid username, email, and password. The email may already be in use.";
+    }
+
+    private void GoToLogin() => Nav.NavigateTo("/");
+}

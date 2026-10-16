@@ -1,0 +1,92 @@
+@page "/dashboard"
+@implements IDisposable
+@inject AuthState Auth
+@inject RecipeService Recipes
+@inject NavigationManager Nav
+
+@if (Auth.IsLoggedIn)
+{
+    <section class="flex flex-wrap items-end justify-between gap-4 mb-6">
+        <div>
+            <h1 class="font-display text-4xl font-bold">Cook. Share. Savor.</h1>
+            <p class="text-stone-500">Welcome back, @Auth.CurrentUser!.Username!</p>
+        </div>
+        <button class="btn-primary" @onclick="() => showForm = !showForm">+ Share a recipe</button>
+    </section>
+
+    @if (showForm)
+    {
+        <section class="card p-6 mb-8 hover:translate-y-0 space-y-3">
+            <h2 class="font-display text-xl font-semibold">New recipe</h2>
+            <input class="input" placeholder="Title" @bind="draft.Title" />
+            <div class="grid sm:grid-cols-2 gap-3">
+                <select class="input" @bind="draft.Cuisine">
+                    @foreach (var c in Recipes.Cuisines)
+                    {
+                        <option value="@c.Name">@c.Emoji @c.Name</option>
+                    }
+                </select>
+                <input class="input" type="number" placeholder="Cook time (min)" @bind="draft.CookTimeMinutes" />
+            </div>
+            <textarea class="input" rows="2" placeholder="Short description" @bind="draft.Description"></textarea>
+            <textarea class="input" rows="3" placeholder="Ingredients (one per line)" @bind="ingredients"></textarea>
+            <textarea class="input" rows="3" placeholder="Steps (one per line)" @bind="steps"></textarea>
+            <div class="flex gap-3">
+                <button class="btn-primary" @onclick="Post">Publish</button>
+                <button class="text-stone-500" @onclick="() => showForm = false">Cancel</button>
+            </div>
+        </section>
+    }
+
+    <section class="flex flex-wrap gap-2 mb-8">
+        <span class="chip @(cuisine is null ? "chip-active" : "")" @onclick="() => cuisine = null">All</span>
+        @foreach (var c in Recipes.Cuisines)
+        {
+            <span class="chip @(cuisine == c.Name ? "chip-active" : "")" @onclick="() => cuisine = c.Name">@c.Emoji @c.Name</span>
+        }
+    </section>
+
+    <section class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        @foreach (var r in Recipes.GetAll(cuisine))
+        {
+            <RecipeCard Recipe="r" @key="r.Id" />
+        }
+    </section>
+}
+
+@code {
+    private string? cuisine;
+    private bool showForm;
+    private Recipe draft = new() { Cuisine = "Italian", CookTimeMinutes = 30 };
+    private string ingredients = "", steps = "";
+
+    protected override void OnInitialized()
+    {
+        if (!Auth.IsLoggedIn)
+        {
+            Nav.NavigateTo("/");
+            return;
+        }
+
+        Recipes.Changed += Refresh;
+    }
+
+    private void Refresh() => InvokeAsync(StateHasChanged);
+
+    private static List<string> Lines(string text) =>
+        text.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+
+    private void Post()
+    {
+        if (string.IsNullOrWhiteSpace(draft.Title)) return;
+
+        draft.Ingredients = Lines(ingredients);
+        draft.Steps = Lines(steps);
+        Recipes.Add(draft, Auth.CurrentUser!);
+        draft = new() { Cuisine = "Italian", CookTimeMinutes = 30 };
+        ingredients = steps = "";
+        showForm = false;
+    }
+
+    public void Dispose() => Recipes.Changed -= Refresh;
+}

@@ -1,0 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .btn-primary { @apply bg-tomato text-white font-semibold px-5 py-2 rounded-full hover:opacity-90 transition; }
+  .btn-basil { @apply bg-basil text-white font-semibold px-4 py-1.5 rounded-full text-sm hover:opacity-90 transition; }
+  .chip { @apply px-4 py-1.5 rounded-full text-sm border border-basil text-basil hover:bg-basil hover:text-white transition cursor-pointer; }
+  .chip-active { @apply bg-basil text-white; }
+  .card { @apply bg-white rounded-2xl shadow-sm hover:shadow-lg hover:-translate-y-1 transition overflow-hidden; }
+  .input { @apply w-full border border-stone-300 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-tomato/40; }
+}
